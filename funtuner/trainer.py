@@ -1,11 +1,13 @@
+from logging import config
 import os
 
 import hydra
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from transformers import Trainer
-from funtuner.datasets import get_datasets
+from funtuner.datasets import get_datasets, FunDataCollator
 from utils import get_model, get_tokenizer
+from peft import LoraConfig, get_peft_model
 
 
 class FunTrainer(Trainer):
@@ -13,7 +15,6 @@ class FunTrainer(Trainer):
         super().__init__(**kwargs)
 
     def compute_loss(self, model, inputs, return_outputs=False):
-
         if not model.config.is_encoder_decoder:
             _ = inputs.pop("decoder_attention_mask")
 
@@ -43,18 +44,31 @@ def train(cfg: DictConfig) -> None:
     model = get_model(cfg.model)
     tokenizer = get_tokenizer(cfg)
 
-    training_args = instantiate(
-        cfg.trainer, report_to="wandb" if cfg.log_wandb else None
-    )
-    train_dataset = get_dataset(cfg.train_dataset, tokenizer)
-    validation_dataset = get_dataset(cfg.test_dataset, tokenizer)
+    if cfg.LoRa:
+        Lora_config = LoraConfig(
+            r=cfg.LoraConfig.get("r", 8),
+            target_modules=cfg.LoraConfig("target_modules", ["q_proj", "v_proj"]),
+            lora_alpha=cfg.LoraConfig("lora_alpha", 16),
+            lora_dropout=cfg.LoraConfig("lora_dropout", 0.05),
+            fan_in_fan_out=cfg.LoraConfig(
+                "fan_in_fan_out",
+            ),
+            bias=cfg.LoraConfig("bias", "none"),
+        )
 
-    datacollator = get_datacollator(
-        model.config.is_encoder_decoder,
+        model = get_peft_model(model, Lora_config)
+
+    training_args = instantiate(
+        cfg.trainer,
+        deepspeed=cfg.deepspeed_config if cfg.deepspeed else None,
+        report_to="wandb" if cfg.log_wandb else None,
+    )
+    train_dataset = get_datasets(cfg.train_dataset)
+    validation_dataset = get_datasets(cfg.test_dataset)
+
+    datacollator = FunDataCollator(
         tokenizer=tokenizer,
-        padding="max_length",
         max_length=cfg.max_length,
-        evil=cfg.evil,
     )
 
     # Initialize our Trainer
