@@ -1,4 +1,3 @@
-from logging import config
 import os
 
 import hydra
@@ -6,8 +5,8 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from transformers import Trainer
 from funtuner.datasets import get_datasets, FunDataCollator
-from utils import get_model, get_tokenizer
-from peft import LoraConfig, get_peft_model
+from funtuner.utils import get_model, get_tokenizer
+from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training
 
 
 class FunTrainer(Trainer):
@@ -43,6 +42,9 @@ def train(cfg: DictConfig) -> None:
 
     model = get_model(cfg.model)
     tokenizer = get_tokenizer(cfg)
+    
+    if cfg.8_bit_training:
+        model = prepare_model_for_int8_training(model)
 
     if cfg.LoRa:
         Lora_config = LoraConfig(
@@ -57,6 +59,9 @@ def train(cfg: DictConfig) -> None:
         )
 
         model = get_peft_model(model, Lora_config)
+        print("--------LoRA------------")
+        model.print_trainable_parameters()
+
 
     training_args = instantiate(
         cfg.trainer,
