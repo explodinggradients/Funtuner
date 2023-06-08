@@ -1,2 +1,2 @@
-from dolly import DollyDataset
+from sftdataset import FunDataset, FunDataCollator
 from utils import *
