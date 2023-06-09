@@ -1,10 +1,15 @@
 from tokenizers import pre_tokenizers
 from transformers import AutoConfig, AutoTokenizer
-from transformers.models.auto.modeling_auto import MODEL_FOR_CAUSAL_LM_MAPPING,
-
+from transformers.models.auto.modeling_auto import MODEL_FOR_CAUSAL_LM_MAPPING
+import requests
+import random
 
 MODEL_MAPPINGS = [MODEL_FOR_CAUSAL_LM_MAPPING]
-
+SPECIAL_TOKENS = {
+    "prompt": "<|prompt|>",
+    "response": "<|response|>",
+    "context": "<|context|>",
+}
 
 def get_tokenizer(config):
     tokenizer = AutoTokenizer.from_pretrained(config.model)
@@ -19,6 +24,7 @@ def get_tokenizer(config):
             "sep_token": config.special_tokens.sep_token,
         }
         tokenizer.add_special_tokens(special_tokens)
+    tokenizer.add_special_tokens({"additional_special_tokens": list(SPECIAL_TOKENS.values())})
 
     return tokenizer
 
@@ -29,3 +35,9 @@ def get_model(name):
         model = mapping.get(type(model_config), None)
         if model is not None:
             return model.from_pretrained(name, config=model_config)
+
+def get_name():
+    word_site = "https://www.mit.edu/~ecprice/wordlist.10000"
+    response = requests.get(word_site)
+    WORDS = response.content.splitlines()
+    return random.choice(WORDS).decode('UTF-8')
