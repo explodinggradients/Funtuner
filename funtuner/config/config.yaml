@@ -1,6 +1,6 @@
 defaults:
   - trainer: default
-model: togethercomputer/RedPajama-INCITE-7B-Base
+model: EleutherAI/gpt-neo-125m
 log_dir: "Funtuner-logs"
 log_wandb: true
 run_name: ""
@@ -17,13 +17,12 @@ datasets:
         split: ["train","test"]
 
 validation_size: 0.1
-deepspeed: true
+deepspeed: false
 deepspeed_config: "./funtuner/config/zero2.json"
-8_bit_training: false
-LoRa: true 
+LoRa: false 
 LoraConfig:
   r: 8
   target_modules: ["q_proj", "v_proj"]
   lora_alpha: 16
   bias: 0.05
-
+eight_bit_training: false
