@@ -4,8 +4,8 @@ import hydra
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from transformers import Trainer
-from funtuner.datasets import get_datasets, FunDataCollator
-from funtuner.utils import get_model, get_tokenizer
+from funtuner.custom_datasets import get_datasets, FunDataCollator
+from funtuner.utils import get_model, get_name, get_tokenizer
 from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training
 
 
@@ -14,9 +14,7 @@ class FunTrainer(Trainer):
         super().__init__(**kwargs)
 
     def compute_loss(self, model, inputs, return_outputs=False):
-        if not model.config.is_encoder_decoder:
-            _ = inputs.pop("decoder_attention_mask")
-
+        
         outputs = model(**inputs)
         loss = outputs.get("loss")
         return (loss, outputs) if return_outputs else loss
@@ -32,18 +30,21 @@ def train(cfg: DictConfig) -> None:
 
     if cfg.log_wandb:
         import wandb
-
+        if cfg.run_name == "":
+            cfg.run_name = get_name()
+        name = f"{cfg.model.split('/')[-1]}-{cfg.run_name}"
         wandb.init(
             project="Funtuner",
             entity=cfg.wandb_entity,
-            name=f"{cfg.model}-{cfg.run_name}-rm",
+            name=name,
             config=cfg,
         )
 
     model = get_model(cfg.model)
     tokenizer = get_tokenizer(cfg)
+    model.resize_token_embeddings(len(tokenizer))
     
-    if cfg.8_bit_training:
+    if cfg.eight_bit_training:
         model = prepare_model_for_int8_training(model)
 
     if cfg.LoRa:
@@ -68,8 +69,7 @@ def train(cfg: DictConfig) -> None:
         deepspeed=cfg.deepspeed_config if cfg.deepspeed else None,
         report_to="wandb" if cfg.log_wandb else None,
     )
-    train_dataset = get_datasets(cfg.train_dataset)
-    validation_dataset = get_datasets(cfg.test_dataset)
+    train_dataset, validation_dataset = get_datasets(cfg)
 
     datacollator = FunDataCollator(
         tokenizer=tokenizer,

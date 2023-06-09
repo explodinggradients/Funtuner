@@ -1,22 +1,19 @@
-from urllib import response
-from sympy import Union
 from torch.utils.data import Dataset
 from datasets import load_dataset
-from utils import SPECIAL_TOKENS
-from typing import List, Union, Optional
-from transformers.tokenization_utils_base import PreTrainedTokenizerBase,
-
-
+from typing import List, Union
+from transformers.tokenization_utils_base import PreTrainedTokenizerBase
+from dataclasses import dataclass
+from funtuner.utils import SPECIAL_TOKENS
 
 def format_output(prompt, context, response):
     if context != "":
         prompt = (
-            SPECIAL_TOKENS["prompter"] + prompt + SPECIAL_TOKENS["context"] + context
+            SPECIAL_TOKENS["prompt"] + prompt + SPECIAL_TOKENS["context"] + context
         )
     else:
-        prompt = SPECIAL_TOKENS["prompter"] + prompt
+        prompt = SPECIAL_TOKENS["prompt"] + prompt
 
-    response = SPECIAL_TOKENS["assistant"] + response
+    response = SPECIAL_TOKENS["response"] + response
 
     return prompt, response
 
@@ -51,7 +48,7 @@ class FunDataset(Dataset):
 
         return format_output(prompt, context, response)
 
-
+@dataclass
 class FunDataCollator:
     tokenizer: PreTrainedTokenizerBase
     max_length: int = 512
@@ -59,7 +56,7 @@ class FunDataCollator:
     def __call__(self, batch):
         batch_maxlen = 0
         batch_input_ids, batch_label_ids = [], []
-        prompts, responses = batch
+        prompts, responses = zip(*batch)
         prompt_tokens = self.tokenizer.batch_encode_plus(
             prompts, return_attention_mask=False
         ).input_ids
@@ -67,12 +64,12 @@ class FunDataCollator:
             responses, return_attention_mask=False
         ).input_ids
         for prompt, rsp in zip(prompt_tokens, response_tokens):
-            input_len = prompt + rsp
+            input_len = len(prompt + rsp)
             if input_len > (self.max_length - 1):
                 rsp = rsp[: -(input_len - self.max_length + 1)]
             input_ids = prompt + rsp + [self.tokenizer.eos_token_id]
-            label_ids = input_ids
-            label_ids[: len(prompt)] = -100
+            label_ids = input_ids.copy()
+            label_ids[: len(prompt)] = [-100] * len(prompt)
             if len(input_ids) > batch_maxlen:
                 batch_maxlen = len(input_ids)
 
@@ -83,15 +80,14 @@ class FunDataCollator:
             {"input_ids": batch_input_ids},
             max_length=batch_maxlen,
             return_attention_mask=True,
-            return_tensors=True,
+            return_tensors="pt",
         )
         batch_label_ids = self.tokenizer.pad(
             {"input_ids": batch_label_ids},
             max_length=batch_maxlen,
             return_attention_mask=False,
-            return_tensors=True,
+            return_tensors="pt",
         )["input_ids"]
 
-        batch["label_ids"] = batch_label_ids
-
+        batch["labels"] = batch_label_ids
         return batch
