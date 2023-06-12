@@ -8,6 +8,7 @@ from funtuner.custom_datasets import get_datasets, FunDataCollator
 from funtuner.utils import get_model, get_name, get_tokenizer
 from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training
 
+JOB_ID = os.environ.get("SLURM_JOB_ID",None)
 
 class FunTrainer(Trainer):
     def __init__(self, **kwargs):
@@ -24,6 +25,9 @@ class FunTrainer(Trainer):
 def train(cfg: DictConfig) -> None:
     if not os.path.exists(cfg.log_dir):
         os.mkdir(cfg.log_dir)
+    if JOB_ID is not None:
+        os.mkdir(os.path.join(cfg.log_dir, JOB_ID))
+        cfg.log_dir = os.path.join(cfg.log_dir, JOB_ID)
 
     if not cfg.log_wandb:
         os.environ["WANDB_MODE"] = "offline"
