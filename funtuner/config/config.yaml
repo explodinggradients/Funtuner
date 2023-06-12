@@ -1,7 +1,7 @@
 defaults:
   - trainer: default
 model: togethercomputer/RedPajama-INCITE-7B-Base
-log_dir: "Funtuner-logs"
+log_dir: "/scratch/c.scmse/Funtuner-logs"
 log_wandb: true
 run_name: ""
 wandb_entity: "shahules786"
