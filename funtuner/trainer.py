@@ -46,6 +46,8 @@ def train(cfg: DictConfig) -> None:
         )
 
     model = get_model(cfg.model)
+    setattr(model, 'model_parallel', True)
+    setattr(model, 'is_parallelizable', True)
     tokenizer = get_tokenizer(cfg)
     model.resize_token_embeddings(len(tokenizer))
     
