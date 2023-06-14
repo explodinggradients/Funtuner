@@ -1,39 +1,47 @@
 from torch.utils.data import Dataset
 from datasets import load_dataset
-from typing import List, Union
+from typing import Union, Optional
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 from dataclasses import dataclass
-from funtuner.utils import SPECIAL_TOKENS
+from datasets import Split
+import json
 
-def format_output(prompt, context, response):
-    if context != "":
-        prompt = (
-            SPECIAL_TOKENS["prompt"] + prompt + SPECIAL_TOKENS["context"] + context
+
+class PromptFormater:
+    def __init__(self, template):
+        self.template = json.load(open("funtuner/config/templates.json"))[template]
+
+    def format(
+        self,
+        instruction: str,
+        context: Optional[str] = None,
+    ):
+        return (
+            self.template["prompt_and_input"].format(
+                instruction=instruction, context=context
+            )
+            if context is not None
+            else self.template["prompt_only"].format(instruction=instruction)
         )
-    else:
-        prompt = SPECIAL_TOKENS["prompt"] + prompt
-
-    response = SPECIAL_TOKENS["response"] + response
-
-    return prompt, response
 
 
 class FunDataset(Dataset):
     def __init__(
         self,
         name: str = "databricks/databricks-dolly-15k",
-        split: Union[List, str] = "train",
-        sep_token: str = "[SEP]",
+        split: Union[Split, str] = "train",
+        template: str = "alpaca-lora",
         **kwargs,
     ):
-        self.dataset = load_dataset(name, split=kwargs.get("split", "train"))
+        self.dataset = load_dataset(name, split=split)
         self.prompt = kwargs.get("prompt", "instruction")
         self.context = kwargs.get("context", None)
         self.response = kwargs.get("response", "response")
-        self.sep_token = sep_token
         for col in [self.prompt, self.context, self.response]:
             if (col is not None) and (col not in self.dataset.features.keys()):
                 raise ValueError(f"feature {col} is not present in {name}")
+
+        self.prompt_formater = PromptFormater(template)
 
     def __len__(self):
         return len(self.dataset)
@@ -46,7 +54,8 @@ class FunDataset(Dataset):
         else:
             context = ""
 
-        return format_output(prompt, context, response)
+        return self.prompt_formater.format(prompt, context), response
+
 
 @dataclass
 class FunDataCollator:

@@ -5,11 +5,7 @@ import requests
 import random
 
 MODEL_MAPPINGS = [MODEL_FOR_CAUSAL_LM_MAPPING]
-SPECIAL_TOKENS = {
-    "prompt": "<|prompt|>",
-    "response": "<|response|>",
-    "context": "<|context|>",
-}
+
 
 def get_tokenizer(config):
     tokenizer = AutoTokenizer.from_pretrained(config.model)
@@ -24,7 +20,6 @@ def get_tokenizer(config):
             "sep_token": config.special_tokens.sep_token,
         }
         tokenizer.add_special_tokens(special_tokens)
-    tokenizer.add_special_tokens({"additional_special_tokens": list(SPECIAL_TOKENS.values())})
 
     return tokenizer
 
