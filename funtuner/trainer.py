@@ -7,6 +7,7 @@ from transformers import Trainer
 from funtuner.custom_datasets import get_datasets, FunDataCollator
 from funtuner.utils import get_model, get_name, get_tokenizer
 from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training
+from omegaconf import OmegaConf
 
 JOB_ID = os.environ.get("SLURM_JOB_ID",None)
 
@@ -51,16 +52,10 @@ def train(cfg: DictConfig) -> None:
     if cfg.eight_bit_training:
         model = prepare_model_for_int8_training(model)
 
+      
     if cfg.LoRa:
         Lora_config = LoraConfig(
-            r=cfg.LoraConfig.get("r", 8),
-            target_modules=cfg.LoraConfig("target_modules", ["q_proj", "v_proj"]),
-            lora_alpha=cfg.LoraConfig("lora_alpha", 16),
-            lora_dropout=cfg.LoraConfig("lora_dropout", 0.05),
-            fan_in_fan_out=cfg.LoraConfig(
-                "fan_in_fan_out",
-            ),
-            bias=cfg.LoraConfig("bias", "none"),
+           **OmegaConf.to_object(cfg.LoraConfig)
         )
 
         model = get_peft_model(model, Lora_config)

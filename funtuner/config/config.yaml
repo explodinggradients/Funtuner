@@ -14,7 +14,7 @@ special_tokens:
 datasets:
 
   - databricks/databricks-dolly-15k:
-        split: ["train","test"]
+        split: ["train"]
 
 validation_size: 0.1
 deepspeed: true
@@ -24,6 +24,7 @@ LoraConfig:
   r: 8
   target_modules: ["q_proj", "v_proj"]
   lora_alpha: 16
-  bias: 0.05
+  bias: none
+  lora_dropout: 0.05
 eight_bit_training: false
 template: alpaca-lora
