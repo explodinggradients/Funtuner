@@ -5,13 +5,13 @@ import yaml
 from pathlib import Path
 
 generator = torch.Generator().manual_seed(42)
-DATASET_MAPPING = yaml.safe_load(Path('funtuner/config/datasets.yaml').read_text())
+DATASET_MAPPING = yaml.safe_load(Path("funtuner/config/datasets.yaml").read_text())
 
 
-def get_single_dataset(name, split, sep_token):
+def get_single_dataset(name, split, template):
     args = DATASET_MAPPING.get(name)
     if args is not None:
-        dataset = FunDataset(name=name, split=split, sep_token=sep_token)
+        dataset = FunDataset(name=name, split=split, template=template)
     else:
         raise ValueError(f"Invalid dataset name {name}. Add dataset to dataset.yaml")
 
@@ -20,7 +20,7 @@ def get_single_dataset(name, split, sep_token):
 
 def get_datasets(config):
     dataset_list = []
-    sep_token = config.special_tokens.sep_token
+    template = config.template
     for dataset in config.datasets:
         name = list(dataset.keys())[0]
         splits = dataset[name].get("split", "train")
@@ -28,7 +28,7 @@ def get_datasets(config):
             get_single_dataset(
                 name,
                 splits,
-                sep_token,
+                template,
             )
         )
 
