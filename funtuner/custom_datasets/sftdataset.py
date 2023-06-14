@@ -1,3 +1,4 @@
+from ast import List
 from torch.utils.data import Dataset
 from datasets import load_dataset
 from typing import Union, Optional
@@ -5,7 +6,7 @@ from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 from dataclasses import dataclass
 from datasets import Split
 import json
-
+from omegaconf import OmegaConf
 
 class PromptFormater:
     def __init__(self, template):
@@ -29,10 +30,13 @@ class FunDataset(Dataset):
     def __init__(
         self,
         name: str = "databricks/databricks-dolly-15k",
-        split: Union[Split, str] = "train",
+        split: Optional[Union[str, Split]] = "train",
         template: str = "alpaca-lora",
         **kwargs,
     ):
+        split = OmegaConf.to_object(split)
+        if isinstance(split, list) and len(split) == 1:
+            split = split[0]
         self.dataset = load_dataset(name, split=split)
         self.prompt = kwargs.get("prompt", "instruction")
         self.context = kwargs.get("context", None)
