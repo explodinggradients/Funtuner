@@ -44,7 +44,8 @@ def train(cfg: DictConfig) -> None:
             name=name,
             config=cfg,
         )
-
+    import torch
+    print("DEVICES", [torch.cuda.get_device_name(i) for i in range(torch.cuda.device_count())])
     model = get_model(cfg.model)
     setattr(model, 'model_parallel', True)
     setattr(model, 'is_parallelizable', True)
