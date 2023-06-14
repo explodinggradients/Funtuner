@@ -56,7 +56,7 @@ class FunDataset(Dataset):
         if self.context is not None:
             context = item[self.context]
         else:
-            context = ""
+            context = None
 
         return self.prompt_formater.format(prompt, context), response
 
