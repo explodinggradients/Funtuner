@@ -1,4 +1,3 @@
-from ast import List
 from torch.utils.data import Dataset
 from datasets import load_dataset
 from typing import Union, Optional

@@ -18,7 +18,7 @@ datasets:
 
 validation_size: 0.1
 deepspeed: true
-deepspeed_config: "./funtuner/config/zero2.json"
+deepspeed_config: "./funtuner/config/zero3.json"
 LoRa: true 
 LoraConfig:
   r: 8
