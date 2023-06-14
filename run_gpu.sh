@@ -2,7 +2,7 @@
 #SBATCH -J RM # job name
 #SBATCH -o o.%x.%j        # output file
 #SBATCH -e e.%x.%j        # error file
-#SBATCH -p gpu            # partition
+#SBATCH -p gpu_v100            # partition
 #SBATCH --gres=gpu:2
 #SBATCH -n 8              # number of tasks (1 CPU per task by default)
 #SBATCH --time=03:00:00   # time
