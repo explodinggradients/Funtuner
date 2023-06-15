@@ -1,6 +1,6 @@
 defaults:
   - trainer: default
-model: togethercomputer/RedPajama-INCITE-7B-Base
+model: togethercomputer/RedPajama-INCITE-Base-3B-v1
 log_dir: "/scratch/c.scmse/Funtuner-logs"
 log_wandb: true
 run_name: ""
@@ -18,7 +18,7 @@ datasets:
 
 validation_size: 0.1
 deepspeed: true
-deepspeed_config: "./funtuner/config/zero3.json"
+deepspeed_config: "./funtuner/config/zero2.json"
 LoRa: true 
 LoraConfig:
   r: 8
