@@ -3,9 +3,9 @@
 #SBATCH -o o.%x.%j        # output file
 #SBATCH -e e.%x.%j        # error file
 #SBATCH -p gpu_v100            # partition
-#SBATCH --gres=gpu:2
+#SBATCH --gres=gpu:1
 #SBATCH -n 8              # number of tasks (1 CPU per task by default)
-#SBATCH --time=03:00:00   # time
+#SBATCH --time=12:00:00   # time
 #SBATCH --account=scw2050 # project account number
 
 module purge
