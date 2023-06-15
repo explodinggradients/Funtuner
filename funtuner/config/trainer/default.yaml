@@ -19,3 +19,4 @@ fp16: true
 lr_scheduler_type: cosine
 warmup_ratio: 0.15
 evaluation_strategy: steps
+use_legacy_prediction_loop: true
