@@ -53,11 +53,10 @@ def train(cfg: DictConfig) -> None:
     model.resize_token_embeddings(len(tokenizer))
     
     if hasattr(model, "enable_input_require_grads"):
-    model.enable_input_require_grads()
+        model.enable_input_require_grads()
     else:
         def make_inputs_require_grad(module, input, output):
             output.requires_grad_(True)
-
         model.get_input_embeddings().register_forward_hook(make_inputs_require_grad)
     
     if cfg.eight_bit_training:
