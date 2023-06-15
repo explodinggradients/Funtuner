@@ -26,5 +26,6 @@ LoraConfig:
   lora_alpha: 16
   bias: none
   lora_dropout: 0.05
+  task_type: CAUSAL_LM
 eight_bit_training: false
 template: alpaca-lora
