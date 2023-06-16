@@ -8,9 +8,7 @@ from funtuner.custom_datasets import get_datasets, FunDataCollator
 from funtuner.utils import get_model, get_name, get_tokenizer
 from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training
 from omegaconf import OmegaConf
-
 JOB_ID = os.environ.get("SLURM_JOB_ID",None)
-
 class FunTrainer(Trainer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -24,11 +22,14 @@ class FunTrainer(Trainer):
 
 @hydra.main(version_base=None, config_path="config", config_name="config")
 def train(cfg: DictConfig) -> None:
+    random_runname = get_name()
     if not os.path.exists(cfg.log_dir):
         os.mkdir(cfg.log_dir)
     if JOB_ID is not None:
-        os.mkdir(os.path.join(cfg.log_dir, JOB_ID))
         cfg.log_dir = os.path.join(cfg.log_dir, JOB_ID)
+        if not os.path.exists(cfg.log_dir):
+            os.mkdir(cfg.log_dir)
+        
 
     if not cfg.log_wandb:
         os.environ["WANDB_MODE"] = "offline"
@@ -36,7 +37,7 @@ def train(cfg: DictConfig) -> None:
     if cfg.log_wandb:
         import wandb
         if cfg.run_name == "":
-            cfg.run_name = get_name()
+            cfg.run_name = random_runname
         name = f"{cfg.model.split('/')[-1]}-{cfg.run_name}"
         wandb.init(
             project="Funtuner",
