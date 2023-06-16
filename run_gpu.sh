@@ -8,7 +8,7 @@
 #SBATCH --time=06:00:00   # time
 #SBATCH --account=scw2050 # project account number
 
-git 
+git pull origin dev-train 
 module purge
 module load deepspeed
 module list
