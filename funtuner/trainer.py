@@ -78,6 +78,8 @@ def train(cfg: DictConfig) -> None:
         cfg.trainer,
         deepspeed=cfg.deepspeed_config if cfg.deepspeed else None,
         report_to="wandb" if cfg.log_wandb else None,
+        output_dir=cfg.log_dir,
+
     )
     train_dataset, validation_dataset = get_datasets(cfg)
 
