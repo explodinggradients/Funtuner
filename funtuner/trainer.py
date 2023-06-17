@@ -8,13 +8,15 @@ from funtuner.custom_datasets import get_datasets, FunDataCollator
 from funtuner.utils import get_model, get_name, get_tokenizer
 from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training
 from omegaconf import OmegaConf
+import torch
+
 JOB_ID = os.environ.get("SLURM_JOB_ID",None)
 class FunTrainer(Trainer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def compute_loss(self, model, inputs, return_outputs=False):
-        
+        print("CUDA",[torch.cuda.memory_allocated(i) for i in range(torch.cuda.device_count())])
         outputs = model(**inputs)
         loss = outputs.get("loss")
         return (loss, outputs) if return_outputs else loss
@@ -45,7 +47,6 @@ def train(cfg: DictConfig) -> None:
             name=name,
             config=cfg,
         )
-    import torch
     print("DEVICES", [torch.cuda.get_device_name(i) for i in range(torch.cuda.device_count())])
     model = get_model(cfg.model)
     setattr(model, 'model_parallel', True)
@@ -87,7 +88,12 @@ def train(cfg: DictConfig) -> None:
         tokenizer=tokenizer,
         max_length=cfg.max_length,
     )
-
+    
+    # from tqdm import tqdm
+    # for i,item in tqdm(enumerate(train_dataset)):
+    #     output = datacollator([item])
+    #     if not (output["input_ids"].size() == output["labels"].size() == output["attention_mask"].size()) :
+    #         print("ERROR",i)
     # Initialize our Trainer
     trainer = FunTrainer(
         model=model,
