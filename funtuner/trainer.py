@@ -111,4 +111,6 @@ def train(cfg: DictConfig) -> None:
 
 
 if __name__ == "__main__":
+    import sys
+    sys.argv = sys.argv[:-1]
     train()
