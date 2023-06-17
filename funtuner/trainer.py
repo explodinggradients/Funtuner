@@ -16,7 +16,7 @@ class FunTrainer(Trainer):
         super().__init__(**kwargs)
 
     def compute_loss(self, model, inputs, return_outputs=False):
-        print("CUDA",[torch.cuda.memory_allocated(i) for i in range(torch.cuda.device_count())])
+        print(f"CUDA",[ {torch.cuda.get_device_name(i) : torch.cuda.memory_allocated(i)} for i in range(torch.cuda.device_count())])
         outputs = model(**inputs)
         loss = outputs.get("loss")
         return (loss, outputs) if return_outputs else loss
