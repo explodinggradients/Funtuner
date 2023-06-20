@@ -3,13 +3,11 @@ from transformers import AutoConfig, AutoTokenizer
 from transformers.models.auto.modeling_auto import MODEL_FOR_CAUSAL_LM_MAPPING
 import requests
 import random
+from pynvml import *
+
 
 MODEL_MAPPINGS = [MODEL_FOR_CAUSAL_LM_MAPPING]
-SPECIAL_TOKENS = {
-    "prompt": "<|prompt|>",
-    "response": "<|response|>",
-    "context": "<|context|>",
-}
+
 
 def get_tokenizer(config):
     tokenizer = AutoTokenizer.from_pretrained(config.model)
@@ -24,7 +22,6 @@ def get_tokenizer(config):
             "sep_token": config.special_tokens.sep_token,
         }
         tokenizer.add_special_tokens(special_tokens)
-    tokenizer.add_special_tokens({"additional_special_tokens": list(SPECIAL_TOKENS.values())})
 
     return tokenizer
 
@@ -41,3 +38,13 @@ def get_name():
     response = requests.get(word_site)
     WORDS = response.content.splitlines()
     return random.choice(WORDS).decode('UTF-8')
+
+
+
+def print_gpu_utilization():    
+    nvmlInit()
+    deviceCount = nvmlDeviceGetCount()
+    for i in range(deviceCount):
+        handle = nvmlDeviceGetHandleByIndex(i)
+        info = nvmlDeviceGetMemoryInfo(handle)
+        print(f"GPU memory occupied: {info.used//1024**2} MB.")

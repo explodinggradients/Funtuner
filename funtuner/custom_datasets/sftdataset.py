@@ -1,39 +1,50 @@
 from torch.utils.data import Dataset
 from datasets import load_dataset
-from typing import List, Union
+from typing import Union, Optional
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 from dataclasses import dataclass
-from funtuner.utils import SPECIAL_TOKENS
+from datasets import Split
+import json
+from omegaconf import OmegaConf
 
-def format_output(prompt, context, response):
-    if context != "":
-        prompt = (
-            SPECIAL_TOKENS["prompt"] + prompt + SPECIAL_TOKENS["context"] + context
+class PromptFormater:
+    def __init__(self, template):
+        self.template = json.load(open("funtuner/config/templates.json"))[template]
+
+    def format(
+        self,
+        instruction: str,
+        context: Optional[str] = None,
+    ):
+        return (
+            self.template["prompt_and_input"].format(
+                instruction=instruction, context=context
+            )
+            if context is not None
+            else self.template["prompt_only"].format(instruction=instruction)
         )
-    else:
-        prompt = SPECIAL_TOKENS["prompt"] + prompt
-
-    response = SPECIAL_TOKENS["response"] + response
-
-    return prompt, response
 
 
 class FunDataset(Dataset):
     def __init__(
         self,
         name: str = "databricks/databricks-dolly-15k",
-        split: Union[List, str] = "train",
-        sep_token: str = "[SEP]",
+        split: Optional[Union[str, Split]] = "train",
+        template: str = "alpaca-lora",
         **kwargs,
     ):
-        self.dataset = load_dataset(name, split=kwargs.get("split", "train"))
+        split = OmegaConf.to_object(split)
+        if isinstance(split, list) and len(split) == 1:
+            split = split[0]
+        self.dataset = load_dataset(name, split=split)
         self.prompt = kwargs.get("prompt", "instruction")
         self.context = kwargs.get("context", None)
         self.response = kwargs.get("response", "response")
-        self.sep_token = sep_token
         for col in [self.prompt, self.context, self.response]:
             if (col is not None) and (col not in self.dataset.features.keys()):
                 raise ValueError(f"feature {col} is not present in {name}")
+
+        self.prompt_formater = PromptFormater(template)
 
     def __len__(self):
         return len(self.dataset)
@@ -44,9 +55,10 @@ class FunDataset(Dataset):
         if self.context is not None:
             context = item[self.context]
         else:
-            context = ""
+            context = None
 
-        return format_output(prompt, context, response)
+        return self.prompt_formater.format(prompt, context), response
+
 
 @dataclass
 class FunDataCollator:
@@ -64,12 +76,15 @@ class FunDataCollator:
             responses, return_attention_mask=False
         ).input_ids
         for prompt, rsp in zip(prompt_tokens, response_tokens):
-            input_len = len(prompt + rsp)
+            input_ids = prompt + rsp
+            input_len = len(input_ids)
             if input_len > (self.max_length - 1):
-                rsp = rsp[: -(input_len - self.max_length + 1)]
-            input_ids = prompt + rsp + [self.tokenizer.eos_token_id]
+                trun_len = (input_len - self.max_length + 1)
+                input_ids = input_ids[:-trun_len]
+                    
+            input_ids += [self.tokenizer.eos_token_id]
             label_ids = input_ids.copy()
-            label_ids[: len(prompt)] = [-100] * len(prompt)
+            label_ids[: len(prompt)] = [-100] * min(len(input_ids), len(prompt))
             if len(input_ids) > batch_maxlen:
                 batch_maxlen = len(input_ids)
 
