@@ -16,7 +16,6 @@ class FunTrainer(Trainer):
         super().__init__(**kwargs)
 
     def compute_loss(self, model, inputs, return_outputs=False):
-        print(f"CUDA",[ {torch.cuda.get_device_name(i) : torch.cuda.memory_allocated(i)} for i in range(torch.cuda.device_count())])
         outputs = model(**inputs)
         loss = outputs.get("loss")
         return (loss, outputs) if return_outputs else loss
@@ -94,6 +93,8 @@ def train(cfg: DictConfig) -> None:
     #     output = datacollator([item])
     #     if not (output["input_ids"].size() == output["labels"].size() == output["attention_mask"].size()) :
     #         print("ERROR",i)
+    #     if output['input_ids'].size(-1) > 512:
+    #         print(output['input_ids'].size(-1))
     # Initialize our Trainer
     trainer = FunTrainer(
         model=model,
@@ -112,6 +113,6 @@ def train(cfg: DictConfig) -> None:
 
 if __name__ == "__main__":
     import sys
-    print(sys.argv[-1])
-    sys.argv = sys.argv[:-1]
+    # print(sys.argv[-1])
+    # sys.argv = sys.argv[:-1]
     train()
