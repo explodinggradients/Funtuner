@@ -1,4 +1,3 @@
-from ast import List
 from torch.utils.data import Dataset
 from datasets import load_dataset
 from typing import Union, Optional
@@ -77,12 +76,15 @@ class FunDataCollator:
             responses, return_attention_mask=False
         ).input_ids
         for prompt, rsp in zip(prompt_tokens, response_tokens):
-            input_len = len(prompt + rsp)
+            input_ids = prompt + rsp
+            input_len = len(input_ids)
             if input_len > (self.max_length - 1):
-                rsp = rsp[: -(input_len - self.max_length + 1)]
-            input_ids = prompt + rsp + [self.tokenizer.eos_token_id]
+                trun_len = (input_len - self.max_length + 1)
+                input_ids = input_ids[:-trun_len]
+                    
+            input_ids += [self.tokenizer.eos_token_id]
             label_ids = input_ids.copy()
-            label_ids[: len(prompt)] = [-100] * len(prompt)
+            label_ids[: len(prompt)] = [-100] * min(len(input_ids), len(prompt))
             if len(input_ids) > batch_maxlen:
                 batch_maxlen = len(input_ids)
 
