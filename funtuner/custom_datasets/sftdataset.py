@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from datasets import Split
 import json
 from omegaconf import OmegaConf
+import torch
+
 
 class PromptFormater:
     def __init__(self, template):
@@ -23,7 +25,12 @@ class PromptFormater:
             if context is not None
             else self.template["prompt_only"].format(instruction=instruction)
         )
-
+    def response(
+        self,
+        generated_text:str
+    ):
+        index = generated_text.find(self.template["response_split"])
+        return generated_text[index + len(self.template["response_split"]):] if index != -1 else generated_text
 
 class FunDataset(Dataset):
     def __init__(
@@ -103,6 +110,7 @@ class FunDataCollator:
             return_attention_mask=False,
             return_tensors="pt",
         )["input_ids"]
+        batch_label_ids = torch.where(batch_label_ids==self.tokenizer.pad_token_id, -100, batch_label_ids)
 
         batch["labels"] = batch_label_ids
         return batch

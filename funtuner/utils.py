@@ -4,7 +4,7 @@ from transformers.models.auto.modeling_auto import MODEL_FOR_CAUSAL_LM_MAPPING
 import requests
 import random
 from pynvml import *
-
+import json
 
 MODEL_MAPPINGS = [MODEL_FOR_CAUSAL_LM_MAPPING]
 
@@ -26,19 +26,19 @@ def get_tokenizer(config):
     return tokenizer
 
 
-def get_model(name):
+def get_model(name, load_in_8bit=False):
     model_config = AutoConfig.from_pretrained(name)
     for mapping in MODEL_MAPPINGS:
         model = mapping.get(type(model_config), None)
         if model is not None:
-            return model.from_pretrained(name, config=model_config)
+            return model.from_pretrained(name, config=model_config, 
+                                         load_in_8bit=load_in_8bit)
 
 def get_name():
     word_site = "https://www.mit.edu/~ecprice/wordlist.10000"
     response = requests.get(word_site)
     WORDS = response.content.splitlines()
     return random.choice(WORDS).decode('UTF-8')
-
 
 
 def print_gpu_utilization():    
@@ -48,3 +48,8 @@ def print_gpu_utilization():
         handle = nvmlDeviceGetHandleByIndex(i)
         info = nvmlDeviceGetMemoryInfo(handle)
         print(f"GPU memory occupied: {info.used//1024**2} MB.")
+
+
+def save_json(filename, data):
+    with open(filename, "w") as file:
+        json.dump(data, file, indent=4)
