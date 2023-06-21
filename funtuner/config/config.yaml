@@ -22,7 +22,7 @@ deepspeed_config: "./funtuner/config/zero2.json"
 LoRa: true 
 LoraConfig:
   r: 8
-  target_modules: ["query_key_value"]
+  target_modules: ["q_proj","v_proj","k_proj"]
   lora_alpha: 16
   bias: none
   lora_dropout: 0.05
