@@ -25,7 +25,12 @@ class PromptFormater:
             if context is not None
             else self.template["prompt_only"].format(instruction=instruction)
         )
-
+    def response(
+        self,
+        generated_text:str
+    ):
+        index = generated_text.find(self.template["response_split"])
+        return generated_text[index + len(self.template["response_split"]):] if index != -1 else generated_text
 
 class FunDataset(Dataset):
     def __init__(
