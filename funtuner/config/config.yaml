@@ -1,6 +1,6 @@
 defaults:
   - trainer: default
-model: togethercomputer/RedPajama-INCITE-7B-Base
+model: EleutherAI/gpt-neo-125m
 log_dir: "/scratch/c.scmse/Funtuner-logs"
 log_wandb: true
 run_name: ""
