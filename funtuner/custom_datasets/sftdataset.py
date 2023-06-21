@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from datasets import Split
 import json
 from omegaconf import OmegaConf
+import torch
+
 
 class PromptFormater:
     def __init__(self, template):
@@ -103,6 +105,7 @@ class FunDataCollator:
             return_attention_mask=False,
             return_tensors="pt",
         )["input_ids"]
+        batch_label_ids = torch.where(batch_label_ids==self.tokenizer.pad_token_id, -100, batch_label_ids)
 
         batch["labels"] = batch_label_ids
         return batch
