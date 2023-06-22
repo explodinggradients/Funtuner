@@ -46,7 +46,7 @@ class Inference:
         **kwargs,
     ):
         # TODO: Add batch_size and iterate if needed
-        format_inputs = [item if len(item)==2 else [item[0],None] for item in inputs ]
+        format_inputs = [item if (len(item) == 2 and item[-1] != "") else [item[0],None] for item in inputs ]
         format_inputs = [self.template.format(instruction, context) for instruction, context in format_inputs]
         format_inputs = self.tokenizer.batch_encode_plus(format_inputs, return_attention_mask=True,
                                                   return_tensors="pt", padding="longest")
