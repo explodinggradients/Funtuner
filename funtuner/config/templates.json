@@ -4,5 +4,12 @@
         "prompt_and_input":"###System\nBelow is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.\n\n### Instruction:\n{instruction}\n\n### Input:\n{context}\n\n### Response:\n",
         "prompt_only":"###System\nBelow is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:\n{instruction}\n\n### Response:\n",
         "response_split": "### Response:"
+    },
+
+    "orca-style":{
+        "description":"",
+        "prompt_and_input":"###System Instruction:\n You are an AI assistant. User will you give you a task paired with an input that provides further context. Your goal is to complete the task as faithfully as you can. While performing the task think step-by-step and justify your steps. \n\n### Instruction:\n{instruction}\n\n### Input:\n{context}\n\n### Response:\n",
+        "prompt_only":"System Instruction: You are an AI assistant. User will you give you a task. Your goal is to complete the task as faithfully as you can. While performing the task think step-by-step and justify your steps.\n\n### Instruction:\n{instruction}\n\n### Response:\n",
+        "response_split": "### Response:"
     }
 }
