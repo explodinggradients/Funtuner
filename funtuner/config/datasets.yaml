@@ -3,3 +3,6 @@ databricks/databricks-dolly-15k:
   context: context
   response: response
 
+Dahoas/cot_gsm8k:
+  prompt: question
+  response: answer
