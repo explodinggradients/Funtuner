@@ -1,10 +1,8 @@
 from peft import PeftModel
-from huggingface_hub import hf_hub_download
 from funtuner.utils import get_model
 from transformers import AutoTokenizer
 from funtuner.custom_datasets.sftdataset import PromptFormater
 from typing import List, Optional
-import json
 import torch
 
 class Inference:
@@ -15,13 +13,12 @@ class Inference:
     ):
         
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-        funtuner_config = hf_hub_download(repo_id = model_name, filename="funtuner_config.json", local_dir=".")
-        funtuner_config = json.load(open("funtuner_config.json"))
-        model = get_model(funtuner_config["model"], load_in_8bit)
+        model = get_model(model_name, load_in_8bit)
         self.model = PeftModel.from_pretrained(model, model_name).eval()
         self.model.to(self.device)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.template = PromptFormater(funtuner_config["template"])
+        self.tokenizer.padding_side = "left"
+        self.template = PromptFormater(self.model.config.get("template", "alpaca-lora"))
         
     def generate(self,
                  instruction:str,
@@ -38,7 +35,7 @@ class Inference:
             "eos_token_id": self.tokenizer.eos_token_id,
         }
         with torch.no_grad():
-            output = self.model.generate(**kwargs)
+            output = self.model.generate(**kwargs)[0]
         output = self.tokenizer.decode(output)
         return self.template.response(output)
     
