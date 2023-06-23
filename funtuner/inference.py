@@ -14,10 +14,12 @@ class Inference:
         load_in_8bit:bool=False,
     ):
         
+        self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         funtuner_config = hf_hub_download(repo_id = model_name, filename="funtuner_config.json", local_dir=".")
         funtuner_config = json.load(open("funtuner_config.json"))
         model = get_model(funtuner_config["model"], load_in_8bit)
         self.model = PeftModel.from_pretrained(model, model_name).eval()
+        self.model.to(self.device)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.template = PromptFormater(funtuner_config["template"])
         
@@ -28,7 +30,7 @@ class Inference:
     ):
         
         text = self.template.format(instruction, context)
-        inputs = self.tokenizer(text, return_tensors="pt")
+        inputs = self.tokenizer(text, return_tensors="pt").to(self.device)
         kwargs |= {
             "input_ids": inputs["input_ids"],
             "attention_mask": inputs["attention_mask"],
@@ -49,7 +51,7 @@ class Inference:
         format_inputs = [item if (len(item) == 2 and item[-1] != "") else [item[0],None] for item in inputs ]
         format_inputs = [self.template.format(instruction, context) for instruction, context in format_inputs]
         format_inputs = self.tokenizer.batch_encode_plus(format_inputs, return_attention_mask=True,
-                                                  return_tensors="pt", padding="longest")
+                                                  return_tensors="pt", padding="longest").to(self.device)
         kwargs |= {
             "input_ids":format_inputs["input_ids"],
             "attention_mask":format_inputs["attention_mask"],

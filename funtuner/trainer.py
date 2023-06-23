@@ -52,6 +52,7 @@ def train(cfg: DictConfig) -> None:
     setattr(model, 'is_parallelizable', True)
     tokenizer = get_tokenizer(cfg)
     model.resize_token_embeddings(len(tokenizer))
+    model.config["template"] = cfg.template
     
     if hasattr(model, "enable_input_require_grads"):
         model.enable_input_require_grads()
@@ -107,11 +108,8 @@ def train(cfg: DictConfig) -> None:
     # training
     trainer.train()
 
-    trainer.save_model(os.path.join(cfg.log_dir, f"{cfg.model.split('/')[-1]}-model"))
+    trainer.save_pretrained(os.path.join(cfg.log_dir, f"{cfg.model.split('/')[-1]}-model"))
     tokenizer.save_pretrained(cfg.log_dir)
-    config = {"template":cfg.template,
-                "model":cfg.model,
-                "max_length":cfg.max_length}
     save_json(os.path.join(cfg.log_dir,"funtuner_config.json"), config)
 
     
