@@ -18,7 +18,7 @@ class Inference:
         self.model.to(self.device)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.tokenizer.padding_side = "left"
-        self.template = PromptFormater(self.model.config.get("template", "alpaca-lora"))
+        self.template = PromptFormater(self.model.config.to_dict().get("template", "alpaca-lora"))
         
     def generate(self,
                  instruction:str,
