@@ -31,17 +31,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args().__dict__
     
-<<<<<<< HEAD
-    model = Inference(args.get("model"))
-    dataset = load_dataset(args.get("dataset"), split="train").select(range(0, 100))
-    dataset.map(sampling, batch_size=args.get("batch_size"))
-    
-=======
     generation_args = {k: args.get(k) for k in generation_args}
     model = Inference(args.get("model"))
     dataset = load_dataset(args.get("dataset"), split="train").select(range(0, 100))
     dataset = dataset.map(lambda batch: sampling(batch, model, generation_args), batch_size=args.get("batch_size"))
     dataset.push_to_hub(args.get("hf_upload"))
->>>>>>> dev
 
     
