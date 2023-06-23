@@ -1,11 +1,11 @@
 defaults:
   - trainer: default
-model: EleutherAI/gpt-neo-125m
+model: togethercomputer/RedPajama-INCITE-Base-3B-v1
 log_dir: "/scratch/c.scmse/Funtuner-logs"
 log_wandb: true
 run_name: ""
 wandb_entity: "shahules786"
-max_length: 512
+max_length: 2048
 per_digit_tokens: False
 special_tokens:
   eos_token: "</s>"
