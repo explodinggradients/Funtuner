@@ -3,7 +3,7 @@ from datasets import load_dataset
 from typing import Union, Optional
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 from dataclasses import dataclass
-from datasets import Split, DatasetDict
+from datasets import Split, DatasetDict, concatenate_datasets
 import json
 from omegaconf import OmegaConf
 import torch
@@ -44,6 +44,8 @@ class FunDataset(Dataset):
         if isinstance(split, list) and len(split) == 1:
             split = split[0]
         self.dataset = load_dataset(name, split=split)
+        if isinstance(self.dataset, list):
+            self.dataset = concatenate_datasets(self.dataset)
         if isinstance(self.dataset, DatasetDict):
                features = self.dataset[list(self.dataset.keys())[0]].features.keys()
         else:
