@@ -58,8 +58,7 @@ def save_json(filename, data):
         
         
 def add_additional_config(cfg):
-    config_files = glob(os.path.join(cfg.log_dir, "**/adapter_config.json"), recursive=True)
-    print(config_files)
+    config_files = glob(os.path.join(cfg.log_dir, "**/*.json"), recursive=True)
     for file in config_files:
         config = json.load(open(file))
         config["template"] = cfg.template
