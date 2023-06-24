@@ -7,7 +7,9 @@ import argparse
 def sampling(examples, model, dataset, **generation_args):
     
     dataset = DATASET_MAPPING[dataset]
-    instruction, input = dataset.get("prompt"), dataset.get("context",[None])
+    instruction, input = dataset.get("prompt"), dataset.get("context",None)
+    instruction = examples[instruction]
+    input = examples[input] if input is not None else [None]
     examples =  list(itertools.zip_longest(instruction, input))
     output = model.batch_generate(examples, **generation_args)
     return {"completion": output}
@@ -39,7 +41,7 @@ if __name__ == "__main__":
     
     generation_args = {k: args.get(k) for k in generation_args}
     model = Inference(args.get("model_url"))
-    dataset = load_dataset(args.get("dataset"), split=args.get("split")).select(range(0, 100))
+    dataset = load_dataset(args.get("dataset"), split=args.get("split")).select(range(0, args.get("num_samples")))
     dataset = dataset.map(lambda batch: sampling(batch, model, args.get("dataset"), **generation_args), batch_size=args.get("batch_size"), batched=True)
     dataset.to_json(args.get("save_path"), indent=4)
 
