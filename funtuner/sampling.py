@@ -4,7 +4,7 @@ from funtuner.custom_datasets.utils import DATASET_MAPPING
 from datasets import load_dataset
 import argparse
 
-def sampling(examples, model, generation_args, dataset):
+def sampling(examples, model, dataset, **generation_args):
     
     dataset = DATASET_MAPPING[dataset]
     instruction, input = dataset.get("prompt"), dataset.get("context",[None])
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     generation_args = {k: args.get(k) for k in generation_args}
     model = Inference(args.get("model_url"))
     dataset = load_dataset(args.get("dataset"), split=args.get("split")).select(range(0, 100))
-    dataset = dataset.map(lambda batch: sampling(batch, model, generation_args, args.get("dataset")), batch_size=args.get("batch_size"), batched=True)
+    dataset = dataset.map(lambda batch: sampling(batch, model, args.get("dataset"), **generation_args), batch_size=args.get("batch_size"), batched=True)
     dataset.to_json(args.get("save_path"), indent=4)
 
     
