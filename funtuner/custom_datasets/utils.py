@@ -11,7 +11,7 @@ DATASET_MAPPING = yaml.safe_load(Path("funtuner/config/datasets.yaml").read_text
 def get_single_dataset(name, split, template):
     args = DATASET_MAPPING.get(name)
     if args is not None:
-        dataset = FunDataset(name=name, split=split, template=template)
+        dataset = FunDataset(name=name, split=split, template=template, **args)
     else:
         raise ValueError(f"Invalid dataset name {name}. Add dataset to dataset.yaml")
 

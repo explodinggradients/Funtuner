@@ -5,6 +5,8 @@ import requests
 import random
 from pynvml import *
 import json
+from glob import glob
+import os
 
 MODEL_MAPPINGS = [MODEL_FOR_CAUSAL_LM_MAPPING]
 
@@ -53,3 +55,12 @@ def print_gpu_utilization():
 def save_json(filename, data):
     with open(filename, "w") as file:
         json.dump(data, file, indent=4)
+        
+        
+def add_additional_config(cfg):
+    config_files = glob(os.path.join(cfg.log_dir, "**/*.json"), recursive=True)
+    for file in config_files:
+        config = json.load(open(file))
+        config["template"] = cfg.template
+        config["train_max_len"] = cfg.max_length
+        save_json(file, config)

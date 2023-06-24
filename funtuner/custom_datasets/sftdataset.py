@@ -3,7 +3,7 @@ from datasets import load_dataset
 from typing import Union, Optional
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 from dataclasses import dataclass
-from datasets import Split
+from datasets import Split, DatasetDict, concatenate_datasets
 import json
 from omegaconf import OmegaConf
 import torch
@@ -44,11 +44,17 @@ class FunDataset(Dataset):
         if isinstance(split, list) and len(split) == 1:
             split = split[0]
         self.dataset = load_dataset(name, split=split)
+        if isinstance(self.dataset, list):
+            self.dataset = concatenate_datasets(self.dataset)
+        if isinstance(self.dataset, DatasetDict):
+               features = self.dataset[list(self.dataset.keys())[0]].features.keys()
+        else:
+            features = self.dataset.features.keys()
         self.prompt = kwargs.get("prompt", "instruction")
         self.context = kwargs.get("context", None)
         self.response = kwargs.get("response", "response")
         for col in [self.prompt, self.context, self.response]:
-            if (col is not None) and (col not in self.dataset.features.keys()):
+            if (col is not None) and (col not in features):
                 raise ValueError(f"feature {col} is not present in {name}")
 
         self.prompt_formater = PromptFormater(template)
