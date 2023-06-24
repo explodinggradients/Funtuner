@@ -4,8 +4,8 @@ import argparse
 
 api = HfApi()
 
-tokenizer_files = ["tokenizer.json", "special_tokens_map.json", "tokenizer_config.json", "config.json"]
-model_files = ["adapter_config.json", "adapter_model.bin", "pytorch_model.bin"]
+tokenizer_files = ["tokenizer.json", "special_tokens_map.json", "tokenizer_config.json"]
+model_files = ["adapter_config.json", "adapter_model.bin"]
 
 if __name__ == "__main__":
 
