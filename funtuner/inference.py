@@ -4,6 +4,8 @@ from transformers import AutoTokenizer
 from funtuner.custom_datasets.sftdataset import PromptFormater
 from typing import List, Optional
 import torch
+from huggingface_hub import hf_hub_download
+import json
 
 class Inference:
     def __init__(
@@ -13,13 +15,22 @@ class Inference:
     ):
         
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-        model = get_model(model_name, load_in_8bit)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        config = self.load_config(model_name)
+        model = get_model(config["base_model_name_or_path"], load_in_8bit)
+        
+        model.resize_token_embeddings(len(self.tokenizer))
         self.model = PeftModel.from_pretrained(model, model_name).eval()
         self.model.to(self.device)
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.tokenizer.padding_side = "left"
-        self.template = PromptFormater(self.model.config.to_dict().get("template", "alpaca-lora"))
+        self.template = PromptFormater(config.get("template", "alpaca-lora"))
         
+    def load_config(self, model_name):
+        
+        config = hf_hub_download(repo_id = model_name, filename="adapter_config.json", local_dir=".")
+        config = json.load(open("adapter_config.json"))
+        return config
+    
     def generate(self,
                  instruction:str,
                  context:Optional[str]=None,

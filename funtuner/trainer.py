@@ -1,11 +1,12 @@
 import os
+from textwrap import indent
 
 import hydra
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from transformers import Trainer
 from funtuner.custom_datasets import get_datasets, FunDataCollator
-from funtuner.utils import get_model, get_name, get_tokenizer, save_json
+from funtuner.utils import get_model, get_name, get_tokenizer, add_additional_config
 from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training
 from omegaconf import OmegaConf
 import torch
@@ -108,13 +109,9 @@ def train(cfg: DictConfig) -> None:
     trainer.train()
 
     # save 
-    trainer.save_model(os.path.join(cfg.log_dir, f"{cfg.model.split('/')[-1]}-model"))
-    config = model.config.to_dict()
-    config["template"] = cfg.template
+    trainer.save_model(os.path.join(cfg.log_dir, f"{cfg.model.split('/')[-1]}-model"))    
     tokenizer.save_pretrained(cfg.log_dir)
-    save_json(os.path.join(cfg.log_dir,"config.json"), config)
-
-    
+    add_additional_config(cfg.log_dir)
     
 if __name__ == "__main__":
     import sys
