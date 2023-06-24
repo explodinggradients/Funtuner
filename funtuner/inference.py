@@ -39,12 +39,12 @@ class Inference:
         
         text = self.template.format(instruction, context)
         inputs = self.tokenizer(text, return_tensors="pt").to(self.device)
-        kwargs |= {
+        kwargs.update({
             "input_ids": inputs["input_ids"],
             "attention_mask": inputs["attention_mask"],
             "pad_token_id": self.tokenizer.pad_token_id,
             "eos_token_id": self.tokenizer.eos_token_id,
-        }
+        })
         with torch.no_grad():
             output = self.model.generate(**kwargs)[0]
         output = self.tokenizer.decode(output)
@@ -60,12 +60,12 @@ class Inference:
         format_inputs = [self.template.format(instruction, context) for instruction, context in format_inputs]
         format_inputs = self.tokenizer.batch_encode_plus(format_inputs, return_attention_mask=True,
                                                   return_tensors="pt", padding="longest").to(self.device)
-        kwargs |= {
+        kwargs.update({
             "input_ids":format_inputs["input_ids"],
             "attention_mask":format_inputs["attention_mask"],
             "pad_token_id": self.tokenizer.pad_token_id,
             "eos_token_id": self.tokenizer.eos_token_id,
-        }
+        })
         
         output = self.model.generate(**kwargs)
         output = self.tokenizer.batch_decode(output)
