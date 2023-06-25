@@ -1,5 +1,5 @@
 from tokenizers import pre_tokenizers
-from transformers import AutoConfig, AutoTokenizer
+from transformers import AutoConfig, AutoTokenizer, LlamaTokenizer
 from transformers.models.auto.modeling_auto import MODEL_FOR_CAUSAL_LM_MAPPING
 import requests
 import random
@@ -12,7 +12,12 @@ MODEL_MAPPINGS = [MODEL_FOR_CAUSAL_LM_MAPPING]
 
 
 def get_tokenizer(config):
-    tokenizer = AutoTokenizer.from_pretrained(config.model)
+    
+    if "llama" not in config.model: 
+        tokenizer = AutoTokenizer.from_pretrained(config.model)
+    else:
+        tokenizer = LlamaTokenizer.from_pretrained(config.model)
+
 
     if hasattr(config, "per_digit_tokens") and config.per_digit_tokens:
         tokenizer._tokenizer.pre_processor = pre_tokenizers.Digits(True)
