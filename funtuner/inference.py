@@ -1,6 +1,6 @@
 from peft import PeftModel
 from funtuner.utils import get_model
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, LlamaTokenizer
 from funtuner.custom_datasets.sftdataset import PromptFormater
 from typing import List, Optional
 import torch
@@ -19,7 +19,7 @@ class Inference:
         config = self.load_config(model_name)
         base_model = config["base_model_name_or_path"]
 
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name, base_model)
+        self.tokenizer = self.load_tokenizer(model_name, base_model)
         model = get_model(base_model, load_in_8bit)
         
         model.resize_token_embeddings(len(self.tokenizer))
