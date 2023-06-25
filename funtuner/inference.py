@@ -16,9 +16,11 @@ class Inference:
     ):
         
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         config = self.load_config(model_name)
-        model = get_model(config["base_model_name_or_path"], load_in_8bit)
+        base_model = config["base_model_name_or_path"]
+
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name, base_model)
+        model = get_model(base_model, load_in_8bit)
         
         model.resize_token_embeddings(len(self.tokenizer))
         self.model = PeftModel.from_pretrained(model, model_name).eval()
@@ -37,6 +39,13 @@ class Inference:
         config = json.load(open(config))
         return config
     
+    def load_tokenizer(model_name, base_model):
+        
+        if "llama" not in base_model: 
+            tokenizer = AutoTokenizer.from_pretrained(model_name)
+        else:
+            tokenizer = LlamaTokenizer.from_pretrained(model_name)
+        return tokenizer
     def generate(self,
                  instruction:str,
                  context:Optional[str]=None,
