@@ -65,7 +65,7 @@ class Inference:
         })
         with torch.no_grad():
             output = self.model.generate(**kwargs)[0]
-        output = self.tokenizer.decode(output)
+        output = self.tokenizer.decode(output, skip_special_tokens=True)
         return self.template.response(output)
     
     def batch_generate(
@@ -86,7 +86,7 @@ class Inference:
         })
         
         output = self.model.generate(**kwargs)
-        output = self.tokenizer.batch_decode(output)
+        output = self.tokenizer.batch_decode(output, skip_special_tokens=True)
         return [self.template.response(text) for text in output]
         
         
