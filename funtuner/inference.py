@@ -39,7 +39,7 @@ class Inference:
         config = json.load(open(config))
         return config
     
-    def load_tokenizer(model_name, base_model):
+    def load_tokenizer(self, model_name, base_model):
         
         if "llama" not in base_model: 
             tokenizer = AutoTokenizer.from_pretrained(model_name)
