@@ -6,6 +6,7 @@ from typing import List, Optional
 import torch
 from huggingface_hub import hf_hub_download
 import json
+import os
 
 class Inference:
     def __init__(
@@ -27,8 +28,12 @@ class Inference:
         
     def load_config(self, model_name):
         
-        config = hf_hub_download(repo_id = model_name, filename="adapter_config.json", local_dir=".")
-        config = json.load(open("adapter_config.json"))
+        if os.path.exists(model_name):
+            file = os.path.join(model_name, "adapter_config.json")
+            config = json.load(open(file))
+        else:
+            config = hf_hub_download(repo_id=model_name, filename="adapter_config.json", local_dir=".")
+            config = json.load(open("adapter_config.json"))
         return config
     
     def generate(self,
