@@ -1,0 +1,55 @@
+.promptBubble {
+  background: rgb(0, 120, 255);
+  width: fit-content;
+  padding: 1px 10px;
+  border-radius: 10px 10px 10px 0;
+  margin: 10px;
+  cursor: pointer;
+}
+
+.replyBubble {
+  background: lightblue;
+  padding: 1px 10px;
+  border-radius: 10px 10px 0 10px;
+  margin: 2px 0 10px 0;
+  line-height: 1.4em;
+}
+
+.noMarkdown {
+  white-space: pre-wrap;
+  padding: 16px 0;
+}
+
+
+.model_name {
+  font-family: monospace;
+}
+
+.sampling_config {
+  display: flex;
+  gap: 10px;
+  color: gray;
+  font-size: 12px;
+  margin: 0 0 0 10px;
+}
+
+.param-value, .sampling_config b {
+  color: #222222;
+}
+
+.replyTableWithAltRows {
+  border-collapse: collapse;
+}
+
+/* color rows with alternating colors */
+.replyTableWithAltRows tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.replyTableWithAltRows tr {
+  border-bottom: 1px solid #ddd;
+}
+
+.replyTableWithAltRows td {
+  padding-bottom: 10px;
+}
