@@ -32,10 +32,10 @@ def update_results(dataset, generation_args: dict, results: dict):
     
     for item in dataset:
         sample = []
-        for i, key in enumerate(generation_args.keys()):
-            sample[i] = {"sampling_config": key, 
+        for _, key in enumerate(generation_args.keys()):
+            sample.append({"sampling_config": key, 
                           "sampling_params": generation_args[key],
-                          "outputs": [item[f"{key}_completion"]]}
+                          "outputs": [item[f"{key}_completion"]]})
         sample_dict = {"prompt": item["instruction"], "results": sample}
         results["prompts"].append(sample_dict)
     
