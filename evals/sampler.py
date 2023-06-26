@@ -7,7 +7,7 @@ from funtuner.inference import Inference
 from funtuner.utils import save_json
 from funtuner.inference import Inference
 
-DATASET = "explodinggradients/llmeval"
+DATASET = "shahules786/llm-eval"
 
 def merge_dicts(generation_args, default_args):
     
