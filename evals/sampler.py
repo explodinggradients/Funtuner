@@ -7,7 +7,7 @@ from funtuner.inference import Inference
 from funtuner.utils import save_json
 from funtuner.inference import Inference
 
-DATASET = "shahules786/llm-eval"
+DATA = "shahules786/llm-eval"
 
 def merge_dicts(generation_args, default_args):
     
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         "args":{
             "device":"cuda",
             "batch_size":args.get("batch_size"),
-            "dataset":DATASET
+            "dataset":DATA
         },
         "prompts":[]
     }
