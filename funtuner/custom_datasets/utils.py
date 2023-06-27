@@ -32,7 +32,7 @@ def get_datasets(config):
             )
         )
 
-    dataset = ConcatDataset(dataset_list).shuffle(seed=42)
+    dataset = ConcatDataset(dataset_list)
     train_dataset, valid_dataset = random_split(
         dataset,
         [1 - config.validation_size, config.validation_size],
