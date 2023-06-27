@@ -24,6 +24,8 @@ class Inference:
         
         model.resize_token_embeddings(len(self.tokenizer))
         self.model = PeftModel.from_pretrained(model, model_name).eval()
+        if not load_in_8bit:
+            self.model = self.model.half()
         self.model.to(self.device)
         self.tokenizer.padding_side = "left"
         self.template = PromptFormater(config.get("template", "alpaca-lora"))
@@ -40,7 +42,6 @@ class Inference:
         return config
     
     def load_tokenizer(self, model_name, base_model):
-        
         if "llama" not in base_model: 
             tokenizer = AutoTokenizer.from_pretrained(model_name)
         else:
@@ -62,7 +63,7 @@ class Inference:
         })
         with torch.no_grad():
             output = self.model.generate(**kwargs)[0]
-        output = self.tokenizer.decode(output)
+        output = self.tokenizer.decode(output, skip_special_tokens=True)
         return self.template.response(output)
     
     def batch_generate(
@@ -83,7 +84,7 @@ class Inference:
         })
         
         output = self.model.generate(**kwargs)
-        output = self.tokenizer.batch_decode(output)
+        output = self.tokenizer.batch_decode(output, skip_special_tokens=True)
         return [self.template.response(text) for text in output]
         
         

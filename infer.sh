@@ -14,4 +14,5 @@ module load deepspeed
 module list
 export PYTHONPATH="${PYTHONPATH}:/home/c.scmse/Funtuner"
 exec singularity exec --nv $DEEPSPEED_IMAGE /nfshome/store03/users/c.scmse/venv/bin/python funtuner/sampling.py --model_url shahules786/Redpajama-3B-CoT --dataset Dahoas/cot_gsm8k 
+exec singularity exec --nv $DEEPSPEED_IMAGE /nfshome/store03/users/c.scmse/venv/bin/python evals/sampler.py --model_url shahules786/Redpajama-3B-CoT 
 

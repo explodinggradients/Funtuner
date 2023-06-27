@@ -1,0 +1,10 @@
+defaults:
+  temperature: 0.0
+  max_new_tokens: 128
+  do_sample: true
+
+k50:
+  top_k: 30
+  top_p: 0.95
+  repetition_penalty: 1.2
+  do_sample: false

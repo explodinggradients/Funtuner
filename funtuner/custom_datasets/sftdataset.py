@@ -22,7 +22,7 @@ class PromptFormater:
             self.template["prompt_and_input"].format(
                 instruction=instruction, context=context
             )
-            if context is not None
+            if context
             else self.template["prompt_only"].format(instruction=instruction)
         )
     def response(
