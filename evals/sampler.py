@@ -71,5 +71,5 @@ if __name__ == "__main__":
         "prompts":[]
     }
     results = update_results(dataset, generation_args, results)
-    print(results)
+    model_name = model_name.split("/")[-1]
     save_json(f"results-{model_name}.json", results)
