@@ -6,3 +6,7 @@ databricks/databricks-dolly-15k:
 Dahoas/cot_gsm8k:
   prompt: question
   response: answer
+
+psmathur/WizardLM_Orca:
+  prompt: instruction
+  response: output

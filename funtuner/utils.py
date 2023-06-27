@@ -7,6 +7,7 @@ from pynvml import *
 import json
 from glob import glob
 import os
+from transformers import GPTNeoXForCausalLM
 
 MODEL_MAPPINGS = [MODEL_FOR_CAUSAL_LM_MAPPING]
 
