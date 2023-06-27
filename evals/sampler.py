@@ -53,7 +53,7 @@ if __name__ == "__main__":
     model_name = args.get("model_url")
     load_8_bits = args.get("load_8_bits")
     model = Inference(model_name, load_8_bits)
-    dataset = load_dataset(DATA, split="train")
+    dataset = load_dataset(DATA, split="train").select(range(0,10))
     generation_args = yaml.safe_load(Path("evals/config/generation.yaml").read_text())
     default_args = generation_args.pop("defaults")
     generation_args = merge_dicts(generation_args, default_args)
@@ -70,7 +70,8 @@ if __name__ == "__main__":
         },
         "prompts":[]
     }
-    
+    print(results)
     results = update_results(dataset, generation_args, results)
+    print(results)
     model_name = model_name.split('/')[-1]
     save_json(f"results-{model_name}.json", results)
