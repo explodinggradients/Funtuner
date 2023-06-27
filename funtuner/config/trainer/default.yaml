@@ -11,7 +11,7 @@ adam_epsilon: 1e-12
 weight_decay: 0.001
 eval_steps: 100
 save_steps: 100
-num_train_epochs: 2
+num_train_epochs: 1
 logging_steps: 10
 max_grad_norm: 1.0
 save_total_limit: 4

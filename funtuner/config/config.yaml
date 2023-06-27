@@ -1,6 +1,6 @@
 defaults:
   - trainer: default
-model: openlm-research/open_llama_3b
+model: openlm-research/open_llama_7b
 log_dir: "/scratch/c.scmse/Funtuner-logs"
 log_wandb: true
 run_name: ""
