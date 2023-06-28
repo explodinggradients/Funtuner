@@ -5,7 +5,7 @@ log_dir: "/scratch/c.scmse/Funtuner-logs"
 log_wandb: true
 run_name: ""
 wandb_entity: "shahules786"
-max_length: 512
+max_length: 1024
 per_digit_tokens: False
 special_tokens:
   eos_token: "</s>"
@@ -20,7 +20,7 @@ datasets:
 
 validation_size: 0.02
 deepspeed: true
-deepspeed_config: "./funtuner/config/zero2.json"
+deepspeed_config: "./funtuner/config/zero3.json"
 LoRa: true 
 LoraConfig:
   r: 8
