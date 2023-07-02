@@ -1,5 +1,5 @@
 {
-    "model_name": "/scratch/c.scmse/Funtuner-logs/59651814/checkpoint-900",
+    "model_name": "shahules786/Redpajama-3B-orcastyle",
     "date": "2023-07-02T12:55:30.022917",
     "args": {
         "device": "cuda",
