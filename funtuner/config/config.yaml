@@ -1,6 +1,6 @@
 defaults:
   - trainer: default
-model: togethercomputer/RedPajama-INCITE-Base-3B-v1
+model: openlm-research/open_llama_7b
 log_dir: "/scratch/c.scmse/Funtuner-logs"
 log_wandb: true
 run_name: ""
