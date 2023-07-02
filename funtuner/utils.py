@@ -7,7 +7,10 @@ from pynvml import *
 import json
 from glob import glob
 import os
-from transformers import GPTNeoXForCausalLM
+import torch
+import bitsandbytes as bnb
+from peft.tuners.lora import LoraLayer        
+from omegaconf import OmegaConf
 
 MODEL_MAPPINGS = [MODEL_FOR_CAUSAL_LM_MAPPING]
 
@@ -34,13 +37,13 @@ def get_tokenizer(config):
     return tokenizer
 
 
-def get_model(name, load_in_8bit=False):
+def get_model(name, **kwargs):
     model_config = AutoConfig.from_pretrained(name)
     for mapping in MODEL_MAPPINGS:
         model = mapping.get(type(model_config), None)
         if model is not None:
             return model.from_pretrained(name, config=model_config, 
-                                         load_in_8bit=load_in_8bit)
+                                         **kwargs)
 
 def get_name():
     word_site = "https://www.mit.edu/~ecprice/wordlist.10000"
@@ -70,3 +73,36 @@ def add_additional_config(cfg):
         config["template"] = cfg.template
         config["train_max_len"] = cfg.max_length
         save_json(file, config)
+        
+        
+def get_lora_modules(model, cfg):
+    
+    modules = cfg.LoraConfig.target_modules
+    cls = bnb.nn.Linear4bit if cfg.load_in_4_bit == 4 else (bnb.nn.Linear8bitLt if cfg.load_in_8_bit == 8 else torch.nn.Linear)
+    if modules != "all":
+        return modules
+
+    modules = {
+        name.split('.')[-1]
+        for name, module in model.named_modules()
+        if isinstance(module, cls)
+    }
+    if 'lm_head' in modules:
+        modules.remove('lm_head')
+    return list(modules)
+            
+    
+def prepare_model_types(model, cfg):
+    
+    for name, module in model.named_modules():
+        if isinstance(model, LoraLayer):
+            if cfg.trainer.bf16:
+                module = module.to(torch.bfloat16)
+        if "norm" in name:
+            module = module.to(torch.float32)
+        if "lm_head" in name or "embed_tokens" in name:
+            if hasattr(module, "weight"):
+                if cfg.trainer.bf16:
+                    module = module.to(torch.bfloat16)
+    return model
+            
