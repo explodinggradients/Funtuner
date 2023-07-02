@@ -20,7 +20,7 @@ class Inference:
         base_model = config["base_model_name_or_path"]
 
         self.tokenizer = self.load_tokenizer(model_name, base_model)
-        model = get_model(base_model, load_in_8bit)
+        model = get_model(base_model, load_in_8bit=load_in_8bit)
 
         
         model.resize_token_embeddings(len(self.tokenizer))
