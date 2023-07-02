@@ -50,7 +50,9 @@ def train(cfg: DictConfig) -> None:
             config=cfg,
         )
     print("DEVICES", [torch.cuda.get_device_name(i) for i in range(torch.cuda.device_count())])
+    print("LOCAL RANK", os.environ.get('LOCAL_RANK'))
     max_memory = {i:V100 for i in range(torch.cuda.device_count())}
+    
     device_map = "auto"
     if os.environ.get('LOCAL_RANK') is not None:
         local_rank = int(os.environ.get('LOCAL_RANK', '0'))
@@ -143,6 +145,4 @@ def train(cfg: DictConfig) -> None:
     add_additional_config(cfg.log_dir)
     
 if __name__ == "__main__":
-    import sys
-    sys.argv = sys.argv[:-1]
     train()
