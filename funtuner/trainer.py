@@ -1,13 +1,12 @@
 import os
-from textwrap import indent
 
 import hydra
 from hydra.utils import instantiate
 from omegaconf import DictConfig
-from transformers import Trainer
+from transformers import Trainer, BitsAndBytesConfig
 from funtuner.custom_datasets import get_datasets, FunDataCollator
-from funtuner.utils import get_model, get_name, get_tokenizer, add_additional_config
-from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training
+from funtuner.utils import get_model, get_name, get_tokenizer, add_additional_config, get_lora_modules, prepare_model_types
+from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 from omegaconf import OmegaConf
 import torch
 
@@ -48,7 +47,22 @@ def train(cfg: DictConfig) -> None:
             config=cfg,
         )
     print("DEVICES", [torch.cuda.get_device_name(i) for i in range(torch.cuda.device_count())])
-    model = get_model(cfg.model)
+    model_args = {"load_in_4bit": cfg.load_in_4_bit, "load_in_8bit": cfg.load_in_8_bit}
+    if cfg.qlora:
+        compute_dtype = (torch.float16 if cfg.trainer.fp16 else (torch.bfloat16 if cfg.trainer.bf16 else torch.float32))
+        quantization_config = BitsAndBytesConfig(
+            load_in_8bit=cfg.load_in_8_bit,
+            load_in_4bit=cfg.load_in_4_bit,
+            llm_int8_threshold=6.0,
+            llm_int8_has_fp16_weight=False,
+            bnb_4bit_compute_dtype=compute_dtype,
+            bnb_4bit_use_double_quant=cfg.qlora_config.double_quant,
+            bnb_4bit_quant_type=cfg.qlora_config.quant_type,
+        )
+        model_args.update({"quantization_config":quantization_config, 
+                           "torch_dtype":compute_dtype})
+    
+    model = get_model(cfg.model, **model_args)
     setattr(model, 'model_parallel', True)
     setattr(model, 'is_parallelizable', True)
     tokenizer = get_tokenizer(cfg)
@@ -60,19 +74,23 @@ def train(cfg: DictConfig) -> None:
         def make_inputs_require_grad(module, input, output):
             output.requires_grad_(True)
         model.get_input_embeddings().register_forward_hook(make_inputs_require_grad)
-    
-    if cfg.eight_bit_training:
-        model = prepare_model_for_int8_training(model)
+        
+    if cfg.qlora:
+        model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=cfg.trainer.gradient_checkpointing)
+        
 
-      
     if cfg.LoRa:
+        Lora_config = OmegaConf.to_object(cfg.LoraConfig)
+        Lora_config["target_modules"] = get_lora_modules(model, cfg)
         Lora_config = LoraConfig(
-           **OmegaConf.to_object(cfg.LoraConfig)
+            **Lora_config
         )
 
         model = get_peft_model(model, Lora_config)
         print("--------LoRA------------")
         model.print_trainable_parameters()
+        
+    model = prepare_model_types(model, cfg)
 
 
     training_args = instantiate(
