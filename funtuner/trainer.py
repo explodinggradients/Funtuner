@@ -11,6 +11,7 @@ from omegaconf import OmegaConf
 import torch
 import warnings
 warnings.filterwarnings("ignore")
+V100 = "16000"
 
 JOB_ID = os.environ.get("SLURM_JOB_ID",None)
 class FunTrainer(Trainer):
@@ -49,7 +50,15 @@ def train(cfg: DictConfig) -> None:
             config=cfg,
         )
     print("DEVICES", [torch.cuda.get_device_name(i) for i in range(torch.cuda.device_count())])
-    model_args = {"load_in_4bit": cfg.load_in_4_bit, "load_in_8bit": cfg.load_in_8_bit}
+    max_memory = {i:V100 for i in range(torch.cuda.device_count())}
+    device_map = "auto"
+    if os.environ.get('LOCAL_RANK') is not None:
+        local_rank = int(os.environ.get('LOCAL_RANK', '0'))
+        device_map = {'': local_rank}
+        max_memory = {'': max_memory[local_rank]}
+        
+    model_args = {"load_in_4bit": cfg.load_in_4_bit, "load_in_8bit": cfg.load_in_8_bit,
+                  "device_map": device_map, "max_memory": max_memory}
     if cfg.qlora:
         compute_dtype = (torch.float16 if cfg.trainer.fp16 else (torch.bfloat16 if cfg.trainer.bf16 else torch.float32))
         quantization_config = BitsAndBytesConfig(
