@@ -132,7 +132,4 @@ def train(cfg: DictConfig) -> None:
     add_additional_config(cfg.log_dir)
     
 if __name__ == "__main__":
-    import sys
-    print(sys.argv[-1])
-    sys.argv = sys.argv[:-1]
     train()
