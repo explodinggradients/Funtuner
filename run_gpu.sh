@@ -13,5 +13,5 @@ module purge
 module load deepspeed
 module list
 export PYTHONPATH="${PYTHONPATH}:/home/c.scmse/Funtuner"
-exec singularity exec --nv $DEEPSPEED_IMAGE /nfshome/store03/users/c.scmse/venv/bin/python3 funtuner/trainer.py
+exec singularity exec --nv $DEEPSPEED_IMAGE /nfshome/store03/users/c.scmse/venv/bin/deepspeed funtuner/trainer.py
 
