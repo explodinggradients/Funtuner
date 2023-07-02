@@ -25,6 +25,8 @@ class Inference:
         
         model.resize_token_embeddings(len(self.tokenizer))
         self.model = PeftModel.from_pretrained(model, model_name).eval()
+        if not load_in_8bit:
+            self.model = self.model.half()
         self.model.to(self.device)
         self.tokenizer.padding_side = "left"
         self.template = PromptFormater(config.get("template", "alpaca-lora"))
