@@ -9,6 +9,8 @@ from funtuner.utils import get_model, get_name, get_tokenizer, add_additional_co
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 from omegaconf import OmegaConf
 import torch
+import warnings
+warnings.filterwarnings("ignore")
 
 JOB_ID = os.environ.get("SLURM_JOB_ID",None)
 class FunTrainer(Trainer):

@@ -1,0 +1,55 @@
+
+.filelist {
+  font-family: 'Roboto', sans-serif;
+  color: gray;
+}
+
+textarea.filenames {
+  width: 100%;
+  height: 200px;
+  box-sizing: border-box;
+  resize: vertical;
+  word-break: break-all;
+  border: 1px solid lightgray;
+  background: #eeeeee;
+  padding: 7px;
+}
+.loading_wait textarea {
+  color: black;
+}
+.loading_success textarea {
+  color: darkgreen;
+}
+.loading_errors, .loading_errors textarea {
+  color: red;
+}
+.local_files {
+  font-family: monospace;
+  margin: 7px;
+  color: darkgreen;
+}
+
+.error {
+  color: darkred;
+}
+
+.hint {
+  color: #555555;
+  font-size: 12px;
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.dropzone {
+  cursor: pointer;
+  min-height: 100px;
+  background: repeating-linear-gradient(-45deg, #eeeeee, #eeeeee 1px, white 5px, white 10px);
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.dropzone_messages {
+  flex-grow: 1;
+}
