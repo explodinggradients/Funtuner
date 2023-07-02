@@ -16,6 +16,7 @@ logging_steps: 10
 max_grad_norm: 1.0
 save_total_limit: 4
 fp16: true
+bf16: false
 lr_scheduler_type: cosine
 warmup_ratio: 0.15
 evaluation_strategy: steps
