@@ -21,7 +21,7 @@ class Inference:
 
         self.tokenizer = self.load_tokenizer(model_name, base_model)
         model = get_model(base_model, load_in_8bit)
-     
+
         
         model.resize_token_embeddings(len(self.tokenizer))
         self.model = PeftModel.from_pretrained(model, model_name).eval()
@@ -43,7 +43,7 @@ class Inference:
         return config
     
     def load_tokenizer(self, model_name, base_model):
-        
+
         if "llama" not in base_model: 
             tokenizer = AutoTokenizer.from_pretrained(model_name)
         else:
