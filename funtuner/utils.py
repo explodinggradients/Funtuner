@@ -77,7 +77,8 @@ def add_additional_config(cfg):
         
         
 def get_lora_modules(model, cfg):
-    modules = OmegaConf.to_object(cfg.LoraConfig.target_modules)
+    
+    modules = cfg.LoraConfig.target_modules
     cls = bnb.nn.Linear4bit if cfg.load_in_4_bit == 4 else (bnb.nn.Linear8bitLt if cfg.load_in_8_bit == 8 else torch.nn.Linear)
     if modules != "all":
         return modules
