@@ -15,7 +15,8 @@ num_train_epochs: 1
 logging_steps: 10
 max_grad_norm: 1.0
 save_total_limit: 4
-fp16: true
+fp16: false
+bf16: true
 lr_scheduler_type: cosine
 warmup_ratio: 0.15
 evaluation_strategy: steps
